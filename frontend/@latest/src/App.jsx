@@ -1,3 +1,4 @@
+/*
 import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
@@ -167,3 +168,152 @@ function App() {
 }
 
 export default App;
+
+*/
+
+import { useState, useEffect } from "react";
+import "./App.css";
+
+function App() {
+  const [lista, setlista] = useState([]);
+  const [titleinput, settitleinput] = useState("");
+  const [valueinput, setvalueinput] = useState("");
+
+  async function LoadData() {
+    const response = await fetch("http://127.0.0.1:3000/artworks");
+    const result = await response.json();
+    setlista(result.data || result);
+  }
+
+  useEffect(() => {
+    LoadData();
+  }, []);
+
+  async function CreateArt() {
+    const response = await fetch("http://127.0.0.1:3000/artworks", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        newTitle: titleinput,
+        newValue: valueinput,
+      }),
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      LoadData();
+      settitleinput("");
+      setvalueinput("");
+    } else {
+      alert(result.message);
+    }
+  }
+
+  async function DeleteArt(id) {
+    const response = await fetch("http://127.0.0.1:3000/artworks/" + id, {
+      method: "DELETE",
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      LoadData();
+    } else {
+      alert(result.message);
+    }
+  }
+
+  // --- New: Update Artwork ---
+  async function UpdateArt(id, newValue) {
+    const response = await fetch("http://127.0.0.1:3000/artworks", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id, value: newValue }),
+    });
+
+    const result = await response.json();
+    alert(result.message);
+    if (response.ok) LoadData();
+  }
+
+  return (
+    <>
+      <header className="text-center mt-2">
+        <h1>Műalkotás gyűjtemény</h1>
+      </header>
+
+      <main className="mt-2 p-2">
+        <section className="col-12 col-md-6 col-lg-8">
+          <h2>Műalkotások listázása:</h2>
+          <ul>
+            {lista.map((item) => (
+              <li key={item.id}>
+                Cím: {item.title} | Érték: {item.value}
+                <button
+                  onClick={() => DeleteArt(item.id)}
+                  className="btn btn-sm btn-danger mt-2 mb-2 ms-2"
+                >
+                  Törlés
+                </button>
+                <br />
+                <input
+                  type="text"
+                  placeholder="Új érték"
+                  onChange={(e) => (item.newValue = e.target.value)}
+                  className="mt-1 me-1"
+                />
+                <button
+                  onClick={() => UpdateArt(item.id, item.newValue)}
+                  className="btn btn-sm btn-warning mt-1 mb-2"
+                >
+                  Módosítás
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <div className="col-12 col-md-6 col-lg-4">
+          <section>
+            <h2>Új műalkotás felvétele:</h2>
+            <label htmlFor="titleinput">Cím</label>
+            <input
+              type="text"
+              name="titleinput"
+              id="titleinput"
+              value={titleinput}
+              onChange={(e) => settitleinput(e.target.value)}
+            />
+            <br />
+            <label htmlFor="valueinput">Érték</label>
+            <input
+              type="text"
+              name="valueinput"
+              id="valueinput"
+              value={valueinput}
+              onChange={(e) => setvalueinput(e.target.value)}
+            />
+            <br />
+            <button
+              className="w-100 btn-success mb-2 mt-3"
+              onClick={CreateArt}
+            >
+              Létrehozás
+            </button>
+          </section>
+        </div>
+      </main>
+
+      <footer className="text-center border border-success mt-3 p-2">
+        <h3>Ali Ebtekar / 2-14FI / Javító Vizsga</h3>
+      </footer>
+    </>
+  );
+}
+
+export default App;
+
+
