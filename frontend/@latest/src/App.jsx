@@ -175,14 +175,15 @@ import { useState, useEffect } from "react";
 import "./App.css";
 
 function App() {
-  const [lista, setlista] = useState([]);
-  const [titleinput, settitleinput] = useState("");
-  const [valueinput, setvalueinput] = useState("");
+  const [lista, setLista] = useState([]);
+  const [titleInput, setTitleInput] = useState("");
+  const [valueInput, setValueInput] = useState("");
+  const [newValue, setNewValue] = useState("");
 
   async function LoadData() {
     const response = await fetch("http://127.0.0.1:3000/artworks");
     const result = await response.json();
-    setlista(result.data || result);
+    setLista(result.data || result);
   }
 
   useEffect(() => {
@@ -196,16 +197,16 @@ function App() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        newTitle: titleinput,
-        newValue: valueinput,
+        newTitle: titleInput,
+        newValue: valueInput,
       }),
     });
 
     const result = await response.json();
     if (response.ok) {
       LoadData();
-      settitleinput("");
-      setvalueinput("");
+      setTitleInput("");
+      setValueInput("");
     } else {
       alert(result.message);
     }
@@ -224,7 +225,6 @@ function App() {
     }
   }
 
-  // --- New: Update Artwork ---
   async function UpdateArt(id, newValue) {
     const response = await fetch("http://127.0.0.1:3000/artworks", {
       method: "PUT",
@@ -249,58 +249,60 @@ function App() {
         <section className="col-12 col-md-6 col-lg-8">
           <h2>Műalkotások listázása:</h2>
           <ul>
-            {lista.map((item) => (
-              <li key={item.id}>
-                Cím: {item.title} | Érték: {item.value}
-                <button
-                  onClick={() => DeleteArt(item.id)}
-                  className="btn btn-sm btn-danger mt-2 mb-2 ms-2"
-                >
-                  Törlés
-                </button>
-                <br />
-                <input
-                  type="text"
-                  placeholder="Új érték"
-                  onChange={(e) => (item.newValue = e.target.value)}
-                  className="mt-1 me-1"
-                />
-                <button
-                  onClick={() => UpdateArt(item.id, item.newValue)}
-                  className="btn btn-sm btn-warning mt-1 mb-2"
-                >
-                  Módosítás
-                </button>
-              </li>
-            ))}
+            {lista.map((item) => {
+            
+
+              return (
+                <li key={item.id}>
+                  Cím: {item.title} | Érték: {item.value}
+                  <button
+                    onClick={() => DeleteArt(item.id)}
+                    className="btn btn-sm btn-danger mt-2 mb-2 ms-2"
+                  >
+                    Törlés
+                  </button>
+                  <br />
+                  <input
+                    type="text"
+                    placeholder="Új érték"
+                    value={newValue}
+                    onChange={(e) => setNewValue(e.target.value)}
+                    className="mt-1 me-1"
+                  />
+                  <button
+                    onClick={() => UpdateArt(item.id, newValue)}
+                    className="btn btn-sm btn-warning mt-1 mb-2"
+                  >
+                    Módosítás
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         </section>
 
         <div className="col-12 col-md-6 col-lg-4">
           <section>
             <h2>Új műalkotás felvétele:</h2>
-            <label htmlFor="titleinput">Cím</label>
+            <label htmlFor="titleinput">cím</label>
             <input
               type="text"
               name="titleinput"
               id="titleinput"
-              value={titleinput}
-              onChange={(e) => settitleinput(e.target.value)}
+              value={titleInput}
+              onChange={(e) => setTitleInput(e.target.value)}
             />
             <br />
-            <label htmlFor="valueinput">Érték</label>
+            <label htmlFor="valueinput">érték</label>
             <input
               type="text"
               name="valueinput"
               id="valueinput"
-              value={valueinput}
-              onChange={(e) => setvalueinput(e.target.value)}
+              value={valueInput}
+              onChange={(e) => setValueInput(e.target.value)}
             />
             <br />
-            <button
-              className="w-100 btn-success mb-2 mt-3"
-              onClick={CreateArt}
-            >
+            <button className="w-100 btn-success mb-2 mt-3" onClick={CreateArt}>
               Létrehozás
             </button>
           </section>
@@ -315,5 +317,3 @@ function App() {
 }
 
 export default App;
-
-
